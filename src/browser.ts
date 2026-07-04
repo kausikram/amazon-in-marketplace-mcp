@@ -18,10 +18,16 @@ export const PROFILE_DIR =
 
 export const BASE_URL = "https://www.amazon.in";
 
-// Headless by default so no window pops up. Set AMAZON_MCP_HEADLESS=0 to start
-// headed. This is the *initial* value only — it can be flipped at runtime via
-// setHeadless() (the set_browser_mode tool), which relaunches the browser.
-let headlessMode = process.env.AMAZON_MCP_HEADLESS !== "0";
+// Headless by default so no window pops up. Set AMAZON_MCP_HEADLESS to any of
+// 0/false/no/off/headed to start headed. Accepting words (not just "0") lets a
+// boolean user_config toggle in an MCPB bundle map cleanly. This is the
+// *initial* value only — flip it at runtime via setHeadless() (set_browser_mode).
+function parseHeadless(v: string | undefined): boolean {
+  const s = (v ?? "").trim().toLowerCase();
+  if (["0", "false", "no", "off", "headed"].includes(s)) return false;
+  return true; // default (empty/unset/anything else) = headless
+}
+let headlessMode = parseHeadless(process.env.AMAZON_MCP_HEADLESS);
 
 export function getHeadless(): boolean {
   return headlessMode;

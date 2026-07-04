@@ -24,6 +24,36 @@ trends.
 | `get_order` | yes | readable detail of one order |
 | `analyze_order_trends` | yes | total spend, avg order value, spend by month, top repeated items, biggest orders |
 
+## Install as a Claude Desktop extension (MCPB) — easiest
+
+A prebuilt **MCPB bundle** (`.mcpb`) is attached to each
+[GitHub Release](https://github.com/kausikram/amazon-in-marketplace-mcp/releases/latest).
+This is the one-click path for **Claude Desktop** — no cloning or building.
+
+1. **Download** `amazon-in-marketplace-mcp.mcpb` from the
+   [latest release](https://github.com/kausikram/amazon-in-marketplace-mcp/releases/latest).
+2. **Install it:** open Claude Desktop → **Settings → Extensions** → drag the
+   `.mcpb` file in (or double-click the file). Review the tools it exposes and
+   click **Install**.
+3. **Configure** (optional) in the extension's settings pane:
+   - **Run headless** — on by default (no window). Turn off if order pages start
+     showing CAPTCHAs.
+   - **Idle auto-close (ms)** — how long the browser lingers before closing
+     itself (default 45000; `0` = never).
+4. **First-time requirements:**
+   - **Chromium** must be present. If Playwright's Chromium isn't installed yet,
+     run once in a terminal: `npx playwright install chromium`
+   - **Sign in once.** Ask Claude to run the `login_status` tool. If it says you
+     aren't signed in, do the one-time interactive login (clone the repo and run
+     `npm run login`, or set `AMAZON_MCP_HEADLESS` off and sign in when a window
+     appears). Your session is saved to `~/.amazon-in-mcp/profile` and reused.
+
+> The bundle contains the server + its Node dependencies, but **not** the
+> Chromium browser binary (Playwright keeps that in a shared cache) — hence the
+> one-time `npx playwright install chromium`.
+
+To build the `.mcpb` yourself: `npm run build && npx @anthropic-ai/mcpb pack .`
+
 ## Install from Git
 
 Clone the repo and build from source (there is no npm-registry package — install

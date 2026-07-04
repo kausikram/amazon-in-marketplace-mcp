@@ -1,0 +1,8 @@
+.git
+.gitignore
+.mcpbignore
+src
+tsconfig.json
+*.mcpb
+node_modules/.cache
+node_modules/.bin
