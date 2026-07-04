@@ -1,5 +1,11 @@
 import type { Page } from "playwright";
-import { getPage, BASE_URL } from "./browser.js";
+import {
+  getPage,
+  BASE_URL,
+  setHeadless,
+  setHoldOpen,
+  getBrowserState,
+} from "./browser.js";
 
 /**
  * Detects whether we are actually signed in, and whether a page has been walled
@@ -75,4 +81,77 @@ export async function guardSignedIn(page: Page): Promise<void> {
   if (!state.signedIn) {
     throw new Error(state.detail);
   }
+}
+
+/**
+ * Interactive login, tool-driven — no terminal needed. Forces a visible
+ * (headed) Chromium window, opens the Amazon.in sign-in page, and holds the
+ * window open so the idle timer can't close it while the user signs in. The
+ * user signs in by hand (including OTP/CAPTCHA); cookies are saved to the
+ * on-disk profile automatically. They then call finish_login to confirm.
+ */
+export async function openLogin(): Promise<{
+  opened: boolean;
+  alreadySignedIn: boolean;
+  nextStep: string;
+  message: string;
+}> {
+  await setHeadless(false); // ensure a visible window; closes any headless ctx
+  setHoldOpen(true); // keep it open while the user signs in
+  const page = await getPage();
+  await page.goto(`${BASE_URL}/ap/signin`, { waitUntil: "domcontentloaded" });
+
+  const state = await inspectAuth(page);
+  if (state.signedIn) {
+    return {
+      opened: true,
+      alreadySignedIn: true,
+      nextStep: "finish_login",
+      message:
+        "You're already signed in — no login needed. Run finish_login to close the window and return to headless.",
+    };
+  }
+  return {
+    opened: true,
+    alreadySignedIn: false,
+    nextStep: "finish_login",
+    message:
+      "A Chrome window opened at the Amazon.in sign-in page. Sign in there and complete any OTP/CAPTCHA. Your session saves automatically. When the homepage shows 'Hello, <name>', run the finish_login tool.",
+  };
+}
+
+/**
+ * Confirm login succeeded, release the hold, and (by default) switch back to
+ * headless — which closes the visible window. Pass keepHeaded=true to stay
+ * headed for a session where you want to watch the browser.
+ */
+export async function finishLogin(
+  args: { keepHeaded?: boolean } = {},
+): Promise<{ signedIn: boolean; mode: string; message: string }> {
+  const page = await getPage();
+  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+  const state = await inspectAuth(page);
+
+  if (!state.signedIn) {
+    // Stay held open so the window remains available to finish signing in.
+    return {
+      signedIn: false,
+      mode: getBrowserState().mode,
+      message:
+        "Still not signed in. Finish signing in in the open window, then run finish_login again. " +
+        state.detail,
+    };
+  }
+
+  setHoldOpen(false); // allow the idle timer to manage the window again
+  const keepHeaded = args.keepHeaded === true;
+  if (!keepHeaded) await setHeadless(true); // closes the window; relaunch headless next call
+
+  return {
+    signedIn: true,
+    mode: getBrowserState().mode,
+    message: keepHeaded
+      ? `${state.detail} Staying headed for this session.`
+      : `${state.detail} Login saved; switched back to headless.`,
+  };
 }

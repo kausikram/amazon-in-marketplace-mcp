@@ -78,6 +78,13 @@ const USER_AGENT =
 let contextPromise: Promise<BrowserContext> | null = null;
 let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
+// While a login is in progress we "hold" the window open so the idle timer
+// can't close it out from under the user mid sign-in. A safety timer releases
+// the hold after HOLD_MAX_MS so we never leak a window forever.
+let holdOpen = false;
+let holdTimer: ReturnType<typeof setTimeout> | null = null;
+const HOLD_MAX_MS = 15 * 60 * 1000;
+
 export function getContext(): Promise<BrowserContext> {
   cancelIdle(); // a call is starting — don't let the idle timer close under us
   if (!contextPromise) {
@@ -94,11 +101,36 @@ function cancelIdle(): void {
 }
 
 /**
+ * Keep the browser open regardless of the idle timer (used during interactive
+ * login). Releasing the hold re-arms the normal idle auto-close.
+ */
+export function setHoldOpen(v: boolean): void {
+  holdOpen = v;
+  if (holdTimer) {
+    clearTimeout(holdTimer);
+    holdTimer = null;
+  }
+  if (v) {
+    cancelIdle();
+    // Safety net: don't hold a window open indefinitely if login is abandoned.
+    holdTimer = setTimeout(() => {
+      holdOpen = false;
+      closeBrowser().catch(() => undefined);
+    }, HOLD_MAX_MS);
+    holdTimer.unref?.();
+  } else {
+    scheduleIdleClose();
+  }
+}
+
+/**
  * Arm the idle timer. Called after each tool call finishes; the next call
  * cancels it. When it fires, the browser (and its window) closes itself.
+ * A no-op while a login hold is active.
  */
 export function scheduleIdleClose(): void {
   cancelIdle();
+  if (holdOpen) return;
   if (!Number.isFinite(IDLE_MS) || IDLE_MS <= 0) return;
   idleTimer = setTimeout(() => {
     closeBrowser().catch(() => undefined);
@@ -146,6 +178,11 @@ export async function newPage(): Promise<Page> {
 
 export async function closeBrowser(): Promise<void> {
   cancelIdle();
+  holdOpen = false;
+  if (holdTimer) {
+    clearTimeout(holdTimer);
+    holdTimer = null;
+  }
   if (contextPromise) {
     const ctx = await contextPromise;
     await ctx.close();

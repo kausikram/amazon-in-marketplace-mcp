@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "amazon-in-marketplace-mcp",
   "display_name": "Amazon.in Marketplace",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Search Amazon.in, read your orders, and analyze order trends via a persistent Playwright browser session.",
   "long_description": "An unofficial, personal-use MCP server for Amazon.in. It drives a single persistent Playwright/Chromium session (your login is saved to an on-disk profile) to search products, list and open your orders, and compute spend trends. There is no official consumer order API — this reads the same pages you see. Not affiliated with Amazon.",
   "author": {
@@ -46,6 +46,8 @@
     }
   },
   "tools": [
+    { "name": "login", "description": "Open a visible window at the Amazon.in sign-in page and hold it open so you can sign in by hand — no terminal needed." },
+    { "name": "finish_login", "description": "Confirm sign-in after using login, close the window, and return to headless." },
     { "name": "login_status", "description": "Check whether you are signed in to Amazon.in, or blocked by a CAPTCHA/sign-in wall." },
     { "name": "get_browser_state", "description": "Report current browser mode (headless/headed), whether a browser is open, idle timeout, and profile dir." },
     { "name": "set_browser_mode", "description": "Switch the browser between headless and headed at runtime." },

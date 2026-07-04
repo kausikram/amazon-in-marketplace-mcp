@@ -16,6 +16,8 @@ trends.
 
 | Tool | Auth needed | What it returns |
 |------|-------------|-----------------|
+| `login` | – | Opens a visible window at the Amazon.in sign-in page and holds it open so you can sign in by hand — no terminal needed |
+| `finish_login` | – | Confirms sign-in, closes the window, returns to headless |
 | `login_status` | – | Whether you're signed in / walled by CAPTCHA |
 | `get_browser_state` | – | Current mode (headless/headed), whether a browser is open, idle timeout, profile dir |
 | `set_browser_mode` | – | Switch headless ↔ headed at runtime (relaunches on next call; login preserved) |
@@ -40,17 +42,16 @@ This is the one-click path for **Claude Desktop** — no cloning or building.
      showing CAPTCHAs.
    - **Idle auto-close (ms)** — how long the browser lingers before closing
      itself (default 45000; `0` = never).
-4. **First-time requirements:**
-   - **Chromium** must be present. If Playwright's Chromium isn't installed yet,
-     run once in a terminal: `npx playwright install chromium`
-   - **Sign in once.** Ask Claude to run the `login_status` tool. If it says you
-     aren't signed in, do the one-time interactive login (clone the repo and run
-     `npm run login`, or set `AMAZON_MCP_HEADLESS` off and sign in when a window
-     appears). Your session is saved to `~/.amazon-in-mcp/profile` and reused.
-
-> The bundle contains the server + its Node dependencies, but **not** the
-> Chromium browser binary (Playwright keeps that in a shared cache) — hence the
-> one-time `npx playwright install chromium`.
+4. **Sign in — no terminal needed.** Just ask Claude to **run the `login`
+   tool**. A Chrome window opens at the Amazon.in sign-in page and stays open;
+   sign in by hand (including OTP/CAPTCHA). When you see "Hello, \<name\>", ask
+   Claude to run **`finish_login`** — it confirms, closes the window, and goes
+   back to headless. Your session is saved to `~/.amazon-in-mcp/profile` and
+   reused on every later call.
+5. **Chromium requirement.** The bundle ships the server + Node deps but not the
+   Chromium binary (Playwright keeps that in a shared cache). If the `login`
+   tool errors that a browser is missing, run once in a terminal:
+   `npx playwright install chromium`
 
 To build the `.mcpb` yourself: `npm run build && npx @anthropic-ai/mcpb pack .`
 
@@ -70,9 +71,9 @@ npm install
 # 3. Build the TypeScript
 npm run build
 
-# 4. One-time interactive login (opens a real Chrome window; sign in, clear
-#    any OTP/CAPTCHA, then press Enter in the terminal to save the session)
-npm run login
+# 4. Build only — no CLI login step needed. Sign in later from your MCP client
+#    by asking Claude to run the `login` tool (opens a window), then
+#    `finish_login`. (A CLI fallback still exists: `npm run login`.)
 ```
 
 You can also install a specific commit or branch by cloning that ref, e.g.
@@ -89,15 +90,16 @@ point is `dist/index.js` — that's the path you register with your MCP client
 cd amazon-in-mcp
 npm install            # also runs `playwright install chromium`
 npm run build
-
-# One-time: sign in by hand. Opens a real Chrome window sharing the server's
-# profile. Complete OTP/CAPTCHA, then press Enter in the terminal.
-npm run login
 ```
 
-The login session is stored in a persistent profile at
-`~/.amazon-in-mcp/profile` (override with `AMAZON_MCP_PROFILE_DIR`). The server
-reuses it, so you normally sign in once.
+**Signing in:** you don't need the command line. Once the server is registered
+with your MCP client, ask Claude to run the **`login`** tool — a Chrome window
+opens at the sign-in page; sign in by hand, then run **`finish_login`**. The
+session is stored in a persistent profile at `~/.amazon-in-mcp/profile`
+(override with `AMAZON_MCP_PROFILE_DIR`) and reused, so you sign in just once.
+
+> CLI fallback: `npm run login` does the same thing from a terminal if you
+> prefer.
 
 ### Environment variables
 

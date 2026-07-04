@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-import { loginStatus } from "./auth.js";
+import { loginStatus, openLogin, finishLogin } from "./auth.js";
 import { searchItems } from "./tools/search.js";
 import { listOrders, getOrder } from "./tools/orders.js";
 import { analyzeOrderTrends } from "./tools/trends.js";
@@ -54,6 +54,33 @@ server.registerTool(
     inputSchema: {},
   },
   tool(async () => loginStatus()),
+);
+
+server.registerTool(
+  "login",
+  {
+    title: "Sign in to Amazon.in (opens a window)",
+    description:
+      "Opens a visible Chrome window at the Amazon.in sign-in page and keeps it open so you can sign in by hand (including OTP/CAPTCHA). Your session is saved automatically for future calls. After signing in, call finish_login. Use this instead of any command-line login.",
+    inputSchema: {},
+  },
+  tool(openLogin),
+);
+
+server.registerTool(
+  "finish_login",
+  {
+    title: "Confirm login & close the window",
+    description:
+      "Verifies you're signed in after using the `login` tool, then closes the visible window and returns to headless mode. Pass keepHeaded=true to keep the browser visible for this session.",
+    inputSchema: {
+      keepHeaded: z
+        .boolean()
+        .optional()
+        .describe("Stay in headed (visible) mode instead of returning to headless. Default false."),
+    },
+  },
+  tool(finishLogin),
 );
 
 server.registerTool(

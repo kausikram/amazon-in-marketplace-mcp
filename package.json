@@ -1,6 +1,6 @@
 {
   "name": "amazon-in-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "stdio MCP server for Amazon.in — search items, read orders, analyze order trends via a persistent Playwright session.",
