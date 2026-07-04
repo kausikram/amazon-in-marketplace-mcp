@@ -5,10 +5,12 @@ logged-in Playwright/Chromium session. It lets an MCP client (Claude Code,
 Claude Desktop, etc.) search products, read your orders, and analyze your order
 trends.
 
-> ⚠️ This automates your personal, logged-in Amazon account via a browser. There
-> is **no official consumer API** for order history — this reads the same pages
-> you see. Use it as a private tool. Heavy automation can trip CAPTCHAs and
-> brushes against Amazon's Terms of Service.
+> ⚠️ **Personal-use tool, unofficial.** Not affiliated with, endorsed by, or
+> associated with Amazon. It automates *your own* logged-in Amazon account via a
+> browser — there is **no official consumer API** for order history, so it reads
+> the same pages you see. Heavy automation can trip CAPTCHAs and brushes against
+> Amazon's Terms of Service. Use it privately and responsibly; you are
+> responsible for your own account and how you use it.
 
 ## Tools
 
@@ -29,8 +31,8 @@ straight from Git):
 
 ```bash
 # 1. Clone
-git clone <YOUR_REPO_URL> amazon-in-mcp
-cd amazon-in-mcp
+git clone git@github.com:kausikram/amazon-in-marketplace-mcp.git
+cd amazon-in-marketplace-mcp
 
 # 2. Install deps (postinstall also downloads the Chromium browser binary)
 npm install
@@ -44,7 +46,8 @@ npm run login
 ```
 
 You can also install a specific commit or branch by cloning that ref, e.g.
-`git clone -b main <YOUR_REPO_URL>`. After `npm run build`, the runnable entry
+`git clone -b main git@github.com:kausikram/amazon-in-marketplace-mcp.git`.
+After `npm run build`, the runnable entry
 point is `dist/index.js` — that's the path you register with your MCP client
 (see **Register** below).
 
