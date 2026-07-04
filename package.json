@@ -1,0 +1,27 @@
+{
+  "name": "amazon-in-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "stdio MCP server for Amazon.in — search items, read orders, analyze order trends via a persistent Playwright session.",
+  "license": "Unlicense",
+  "bin": {
+    "amazon-in-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "login": "tsc && node dist/login.js",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "playwright": "^1.48.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
