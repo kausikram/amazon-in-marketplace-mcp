@@ -99,7 +99,9 @@ export async function openLogin(): Promise<{
   await setHeadless(false); // ensure a visible window; closes any headless ctx
   setHoldOpen(true); // keep it open while the user signs in
   const page = await getPage();
-  await page.goto(`${BASE_URL}/ap/signin`, { waitUntil: "domcontentloaded" });
+  // Land on the homepage (not the /ap/signin deep link, which can error without
+  // the right params). The user clicks "Sign in" from here.
+  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
 
   const state = await inspectAuth(page);
   if (state.signedIn) {
@@ -116,7 +118,7 @@ export async function openLogin(): Promise<{
     alreadySignedIn: false,
     nextStep: "finish_login",
     message:
-      "A Chrome window opened at the Amazon.in sign-in page. Sign in there and complete any OTP/CAPTCHA. Your session saves automatically. When the homepage shows 'Hello, <name>', run the finish_login tool.",
+      "A Chrome window opened at amazon.in. Click 'Sign in' (top right, under 'Hello, sign in') and log in — complete any OTP/CAPTCHA. Your session saves automatically. When the header shows 'Hello, <name>', run the finish_login tool.",
   };
 }
 

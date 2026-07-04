@@ -22,11 +22,12 @@ async function main() {
   });
 
   const page = context.pages()[0] ?? (await context.newPage());
-  await page.goto(`${BASE_URL}/ap/signin`, { waitUntil: "domcontentloaded" });
+  // Land on the homepage; the /ap/signin deep link can error without params.
+  await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
 
   process.stderr.write(
-    "\n>>> Sign in to Amazon.in in the opened window.\n" +
-      ">>> Complete any OTP / CAPTCHA. When you see the homepage with 'Hello, <name>',\n" +
+    "\n>>> Click 'Sign in' (top right) and sign in to Amazon.in in the opened window.\n" +
+      ">>> Complete any OTP / CAPTCHA. When you see the header with 'Hello, <name>',\n" +
       ">>> come back here and press Enter to save the session and close.\n\n",
   );
 
